@@ -25,10 +25,10 @@ namespace Ecom.Infrastructure.Data.Config
 
             builder.HasData(
                 
-                new Product { Id = 1, Name = "Iphone 12", Description = "Iphone 12", Price = 1000, CategoryId = 1 },
-                new Product { Id = 2, Name = "Iphone 11", Description = "Iphone 11", Price = 900, CategoryId = 1 },
-                new Product { Id = 3, Name = "Iphone 10", Description = "Iphone 10", Price = 800, CategoryId = 1 },
-                new Product { Id = 4, Name = "Lenovo", Description = "Lenovo legion 5 pro", Price = 10000, CategoryId = 3 }
+                new Product { Id = 1, Name = "Iphone 12", Description = "Iphone 12", Price = 1000, CategoryId = 1, ProductPicture = "https://" },
+                new Product { Id = 2, Name = "Iphone 11", Description = "Iphone 11", Price = 900, CategoryId = 1, ProductPicture = "https://" },
+                new Product { Id = 3, Name = "Iphone 10", Description = "Iphone 10", Price = 800, CategoryId = 1, ProductPicture = "https://" },
+                new Product { Id = 4, Name = "Lenovo", Description = "Lenovo legion 5 pro", Price = 10000, CategoryId = 3, ProductPicture = "https://" }
 
                 );
 
