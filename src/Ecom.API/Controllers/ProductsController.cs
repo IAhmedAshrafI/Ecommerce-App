@@ -5,6 +5,9 @@ using Ecom.core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
+using Ecom.API.Errors;
+using Ecom.core.Sharing;
+using Ecom.API.Helper;
 
 namespace Ecom.API.Controllers
 {
@@ -22,18 +25,23 @@ namespace Ecom.API.Controllers
         }
 
         [HttpGet("get-all-products")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery]ProductParams productParams)
         {
             
-            var products = await _uOW.ProductRepository.GetAllAsync(x=>x.Category);
-            var newProduct = _mapper.Map<List<ProductDto>>(products);
-            return Ok(newProduct);
+            var products = await _uOW.ProductRepository.GetAllAsync(productParams);
+            var newProduct = _mapper.Map<IReadOnlyList<ProductDto>>(products);
+            var countItmes = newProduct.Count();
+            return Ok(new Pagination<ProductDto>(productParams.PageNumber, productParams.PageSize, countItmes, newProduct));
         }
 
         [HttpGet("get-product-by-id/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseCommonResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _uOW.ProductRepository.GetByIdAsync(id, x=> x.Category);
+            if (product is null)
+                return NotFound(new BaseCommonResponse(404));
             var newProduct = _mapper.Map<ProductDto>(product);
             return Ok(newProduct);
         }
