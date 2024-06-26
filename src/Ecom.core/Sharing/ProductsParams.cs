@@ -27,7 +27,7 @@ namespace Ecom.core.Sharing
         public string Search
         {
             get { return _search; }
-            set { _search = value.ToLower(); }
+            set {_search = value.ToLower(); }
         }
 
 

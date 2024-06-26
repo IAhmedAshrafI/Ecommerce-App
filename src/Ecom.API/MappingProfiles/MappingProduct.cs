@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Ecom.Core.Dtos;
 using Ecom.core.Entities;
+using Ecom.API.Helper;
 
 namespace Ecom.API.MappingProfiles
 {
@@ -10,7 +11,7 @@ namespace Ecom.API.MappingProfiles
         {
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.ProductPicture, opt => opt.MapFrom(src => src.ProductPicture))
+                .ForMember(dest => dest.ProductPicture, opt => opt.MapFrom<ProductUrlResolver>())
                 .ReverseMap();
             CreateMap<CreateProductDto, Product>().ReverseMap();
 

@@ -57,45 +57,51 @@ namespace Ecom.Infrastructure.Repositories
         }
         public async Task<bool> AddAsync(CreateProductDto dto)
         {
+            var src = "";
             if (dto.Image is not null)
             {
-                var root = "/images/products";
-                var productName = $"{Guid.NewGuid()}"+ dto.Image.FileName;
+                var root = "/images/products/";
+                var productName = $"{Guid.NewGuid()}" + dto.Image.FileName;
                 if (!Directory.Exists("wwwroot" + root))
                 {
                     Directory.CreateDirectory("wwwroot" + root);
                 }
-                var src = root + productName;
+
+                src = root + productName;
                 var picInfo = _fileProvider.GetFileInfo(src);
                 var rootPath = picInfo.PhysicalPath;
-                using (var fileStream = new FileStream(rootPath,FileMode.Create))
+                using (var fileStream = new FileStream(rootPath, FileMode.Create))
                 {
                     await dto.Image.CopyToAsync(fileStream);
                 }
 
-                var product = _mapper.Map<Product>(dto);
-                product.ProductPicture = src;
-                await _context.Products.AddAsync(product);
-                await _context.SaveChangesAsync();
-                return true;
+
             }
-            return false;
+            //Create New Product
+            var res = _mapper.Map<Product>(dto);
+            res.ProductPicture = src;
+            await _context.Products.AddAsync(res);
+            await _context.SaveChangesAsync();
+            return true;
+
         }
 
         public async Task<bool> UpdateAsync(int id, UpdateProductDto dto)
         {
-            var CurretProduct = await _context.Products.FindAsync(id);
-            if (CurretProduct is not null)
+            var currentProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            if (currentProduct is not null)
             {
+
                 var src = "";
                 if (dto.Image is not null)
                 {
-                    var root = "/images/products";
+                    var root = "/images/products/";
                     var productName = $"{Guid.NewGuid()}" + dto.Image.FileName;
                     if (!Directory.Exists("wwwroot" + root))
                     {
                         Directory.CreateDirectory("wwwroot" + root);
                     }
+
                     src = root + productName;
                     var picInfo = _fileProvider.GetFileInfo(src);
                     var rootPath = picInfo.PhysicalPath;
@@ -104,21 +110,27 @@ namespace Ecom.Infrastructure.Repositories
                         await dto.Image.CopyToAsync(fileStream);
                     }
                 }
-                if (!string.IsNullOrEmpty(CurretProduct.ProductPicture))
+                //remove old picture
+                if (!string.IsNullOrEmpty(currentProduct.ProductPicture))
                 {
-                    var picInfo = _fileProvider.GetFileInfo(CurretProduct.ProductPicture);
+                    //delete old picture
+                    var picInfo = _fileProvider.GetFileInfo(currentProduct.ProductPicture);
                     var rootPath = picInfo.PhysicalPath;
-                    File.Delete(rootPath);
+                    System.IO.File.Delete(rootPath);
                 }
 
+                //update product
                 var res = _mapper.Map<Product>(dto);
                 res.ProductPicture = src;
+                res.Id = id;
                 _context.Products.Update(res);
                 await _context.SaveChangesAsync();
+
+
                 return true;
-            }    
+
+            }
             return false;
-            
         }
 
         public async Task<bool> DeleteAsyncWithPicture(int id)

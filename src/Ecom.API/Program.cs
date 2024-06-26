@@ -3,6 +3,11 @@ using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.FileProviders;
 using Ecom.API.Middleware;
+using Ecom.API.Extensions;
+using StackExchange.Redis;
+using Ecom.Infrastructure.Repositories;
+using Ecom.Core.Services;
+using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,8 +15,46 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(s =>
+{
+  var securitySchema = new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    Description = "JWt Auth Bearer",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.Http,
+    Scheme = "bearer",
+    Reference = new OpenApiReference
+    {
+      Id = "Bearer",
+      Type = ReferenceType.SecurityScheme
+    }
+  };
+  s.AddSecurityDefinition("Bearer", securitySchema);
+  var securityRequirement = new OpenApiSecurityRequirement { { securitySchema, new[] { "Bearer" } } };
+  s.AddSecurityRequirement(securityRequirement);
+});
 builder.Services.InfrastructureConfiguration(builder.Configuration);
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(i =>
+{
+  var configure = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"), true);
+  return ConnectionMultiplexer.Connect(configure);
+});
+
+
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+                             builder =>
+                             {
+                          builder.WithOrigins("http://localhost:4200")
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
+});
 
 //add configration for auto mapper
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -34,10 +77,12 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseCors("CorsPolicy");
-
+app.UseCors(myAllowSpecificOrigins);
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+InfrastructureRegestrattion.InfrastructureConfigMiddleware(app);
 
 app.Run();
