@@ -1,3 +1,4 @@
+using Ecom.Core.Dtos;
 using Ecom.Core.Entities;
 using Ecom.Core.Interfaces;
 using StackExchange.Redis;
@@ -15,6 +16,7 @@ namespace Ecom.Infrastructure.Repositories
     private readonly IDatabase _database; 
     public BasketRepository(IConnectionMultiplexer redis)
     {
+      _database = redis.GetDatabase();
     }
     public async Task<bool> DeleteBasketAsync(string basketId)
     {

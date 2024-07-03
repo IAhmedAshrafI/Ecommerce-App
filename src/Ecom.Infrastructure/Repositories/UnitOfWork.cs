@@ -30,7 +30,8 @@ namespace Ecom.Infrastructure.Repositories
             _context = context;
             _fileProvider = fileProvider;
             _mapper = mapper;
-            CategoryRepository = new CategoryRepository(_context);
+            _redis = redis;
+      CategoryRepository = new CategoryRepository(_context);
             ProductRepository = new ProductRepository(_context, _fileProvider, _mapper);
             BasketRepository = new BasketRepository(_redis);
     }

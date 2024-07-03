@@ -42,6 +42,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(i =>
   return ConnectionMultiplexer.Connect(configure);
 });
 
+builder.Services.AddScoped<IOrderServices, OrderServices>();
+
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 

@@ -29,10 +29,9 @@ namespace Ecom.API.Controllers
     }
 
     [HttpPost("update-basket")]
-    public async Task<IActionResult> UpdateBasket(CustomerBasketDto customerBasket)
+    public async Task<IActionResult> UpdateBasket(CustomerBasket customerBasket)
     {
-      var result = _mapper.Map<CustomerBasketDto, CustomerBasket>(customerBasket);
-      var _basket = await _uOW.BasketRepository.UpdateBasketAsync(result);
+      var _basket = await _uOW.BasketRepository.UpdateBasketAsync(customerBasket);
 
       return Ok(_basket);
     }
