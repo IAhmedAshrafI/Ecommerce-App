@@ -8,6 +8,8 @@ using StackExchange.Redis;
 using Ecom.Infrastructure.Repositories;
 using Ecom.Core.Services;
 using Microsoft.OpenApi.Models;
+using Ecom.core.Interfaces;
+using Stripe;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -43,6 +45,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(i =>
 });
 
 builder.Services.AddScoped<IOrderServices, OrderServices>();
+builder.Services.AddScoped<IPaymentServices, PaymentServices>();
+
 
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";

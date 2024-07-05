@@ -17,11 +17,13 @@ namespace Ecom.Infrastructure.Repositories
 
     private readonly IUnitOfWork _uOW;
     private readonly ApplicationDbContext _context;
+    private readonly IPaymentServices _paymentServices;
 
-    public OrderServices(IUnitOfWork UOW, ApplicationDbContext context)
+    public OrderServices(IUnitOfWork UOW, ApplicationDbContext context, IPaymentServices paymentServices)
     {
       _uOW = UOW;
       _context = context;
+      _paymentServices = paymentServices;
     }
     public async Task<Order> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, ShipAddress shipAddress)
     {
@@ -44,12 +46,20 @@ namespace Ecom.Infrastructure.Repositories
 
       var subTotal = items.Sum(x => x.Price * x.Quantity);
 
-      var order = new Order(buyerEmail, shipAddress, deliveryMethod, items, subTotal);
+      var existingOrder = await _context.Orders.Where(x => x.PaymentIntentId == basket.PaymentIntentId)
+                            .FirstOrDefaultAsync();
+      if (deliveryMethod is not null)
+      {
+        _context.Orders.Remove(existingOrder);
+        await _paymentServices.CreateOrUpdatePaymentIntent(basket.PaymentIntentId);
+      }
+
+      var order = new Order(buyerEmail, shipAddress, deliveryMethod, items, subTotal, basket.PaymentIntentId);
 
       if(order == null) return null;
       await _context.Orders.AddAsync(order);
       await _context.SaveChangesAsync();
-      await _uOW.BasketRepository.DeleteBasketAsync(basketId);
+      //await _uOW.BasketRepository.DeleteBasketAsync(basketId);
       return order;
 
     }

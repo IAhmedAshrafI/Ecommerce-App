@@ -27,9 +27,9 @@ namespace Ecom.Infrastructure
         {
       services.AddScoped<ITokenServices, TokenServices>();
       services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //services.AddScoped<IcategoryRepository, CategoryRepository>();
-            //services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+      //services.AddScoped<IcategoryRepository, CategoryRepository>();
+      //services.AddScoped<IProductRepository, ProductRepository>();
+      services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddDbContext<ApplicationDbContext>(opt =>
             {
